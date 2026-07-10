@@ -205,15 +205,11 @@ def load_components(path: Path) -> list[Component]:
     return load_components_from_data(data)
 
 
-def resolve_sbom_source(source: str | Path, timeout: int = 15) -> tuple[dict[str, Any], str]:
-    """Load raw SBOM JSON from a local file path, a remote URL, or inline JSON text.
+def resolve_sbom_source(source):
 
-    MCP clients (like Claude) often only have the *contents* of an uploaded
-    file, not a path the server's filesystem can see. Accepting inline JSON
-    and URLs alongside local paths lets a single `path`/`source` argument
-    cover all three cases without erroring out with "file not found" or
-    "file name too long".
-    """
+    if isinstance(source, bytes):
+        source = source.decode("utf-8")
+
     text = str(source).strip()
 
     if text.startswith("http://") or text.startswith("https://"):
