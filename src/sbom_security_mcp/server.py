@@ -6,6 +6,8 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from mcp.types import File
+
 
 from .core import (
     analyze_sbom_file,
@@ -59,6 +61,30 @@ if FastMCP:
         result = compare_sbom_files(paths)
         payload = comparison_to_dict(result)
         payload["markdown_report"] = render_comparison_markdown(result)
+        return payload
+    
+    @mcp.tool()
+    def inspect_uploaded_sbom(file: File) -> dict:
+        """
+        Analyze uploaded SBOM.
+        """
+
+        source = getattr(file, "path", None)
+
+        if source is None:
+            source = getattr(file, "url", None)
+
+        if source is None:
+            source = getattr(file, "content", None)
+
+        if source is None:
+            raise ValueError("Unsupported File object.")
+
+        result = analyze_sbom_file(source)
+
+        payload = analysis_to_dict(result)
+        payload["markdown_report"] = render_analysis_markdown(result)
+
         return payload
 
 
