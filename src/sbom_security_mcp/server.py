@@ -34,7 +34,15 @@ if FastMCP:
 
     @mcp.tool()
     def inspect_sbom(path: str) -> dict:
-        """Analyze one CycloneDX or SPDX SBOM and return prioritized findings."""
+        """Analyze one CycloneDX or SPDX SBOM and return prioritized findings.
+
+        `path` accepts any of the following:
+        - A local file path on this server (e.g. "/data/sbom.json")
+        - An https:// URL to a raw SBOM JSON file (e.g. a GitHub raw link)
+        - The raw SBOM JSON content itself, pasted in directly (useful when
+          the caller only has an uploaded file's contents, not a path this
+          server can read)
+        """
         result = analyze_sbom_file(path)
         payload = analysis_to_dict(result)
         payload["markdown_report"] = render_analysis_markdown(result)
@@ -42,7 +50,12 @@ if FastMCP:
 
     @mcp.tool()
     def compare_sbom_candidates(paths: list[str]) -> dict:
-        """Compare multiple SBOM candidates and recommend the safest release option."""
+        """Compare multiple SBOM candidates and recommend the safest release option.
+
+        Each entry in `paths` accepts a local file path, an https:// URL, or
+        the raw SBOM JSON content itself (see `inspect_sbom` for details).
+        Provide at least two candidates.
+        """
         result = compare_sbom_files(paths)
         payload = comparison_to_dict(result)
         payload["markdown_report"] = render_comparison_markdown(result)
